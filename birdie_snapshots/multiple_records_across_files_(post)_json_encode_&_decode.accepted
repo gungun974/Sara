@@ -1,0 +1,33 @@
+---
+version: 1.5.4
+title: Multiple Records across files (post) JSON encode & decode
+---
+import comment_json
+import gleam/dynamic/decode
+import gleam/json
+import post
+
+pub fn post_to_json(post: post.Post) -> json.Json {
+  case post {
+    post.Post(id:, title:, messages:) ->
+      json.object([
+        #("id", json.int(id)),
+        #("title", json.string(title)),
+        #(
+          "messages",
+          json.array(messages, fn(x) { comment_json.comment_to_json(x) }),
+        ),
+      ])
+  }
+}
+
+pub fn post_json_decoder() -> decode.Decoder(post.Post) {
+  use id <- decode.field("id", decode.int)
+  use title <- decode.field("title", decode.string)
+  use messages <- decode.field(
+    "messages",
+    decode.list(comment_json.comment_json_decoder()),
+  )
+  decode.success(post.Post(id:, title:, messages:))
+}
+

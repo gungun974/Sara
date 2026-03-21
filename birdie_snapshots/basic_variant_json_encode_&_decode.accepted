@@ -1,0 +1,35 @@
+---
+version: 1.5.4
+title: Basic Variant JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/json
+
+pub fn password_to_json(password: entity.Password) -> json.Json {
+  case password {
+    entity.Secure ->
+      json.object([
+        #("type", json.string("secure")),
+      ])
+
+    entity.Unsecure ->
+      json.object([
+        #("type", json.string("unsecure")),
+      ])
+  }
+}
+
+pub fn password_json_decoder() -> decode.Decoder(entity.Password) {
+  use variant <- decode.field("type", decode.string)
+  case variant {
+    "secure" -> {
+      decode.success(entity.Secure)
+    }
+    "unsecure" -> {
+      decode.success(entity.Unsecure)
+    }
+    _ -> decode.failure(entity.Secure, "Password")
+  }
+}
+

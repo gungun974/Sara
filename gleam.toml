@@ -1,0 +1,19 @@
+name = "sara"
+version = "1.0.0"
+
+description = "A a serialization code generator for Gleam"
+
+licences = ["Apache-2.0"]
+repository = { type = "github", user = "gungun974", repo = "Sara" }
+
+[dependencies]
+builder = "== 0.0.1"
+justin = ">= 1.0.1 and < 2.0.0"
+filepath = ">= 1.1.2 and < 2.0.0"
+gleam_stdlib = ">= 0.44.0 and < 2.0.0"
+glance = ">= 6.0.0 and < 7.0.0"
+
+[dev-dependencies]
+gleeunit = ">= 1.0.0 and < 2.0.0"
+booklet = ">= 1.1.0 and < 2.0.0"
+birdie = ">= 1.5.4 and < 2.0.0"

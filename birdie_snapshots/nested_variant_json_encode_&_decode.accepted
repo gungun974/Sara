@@ -1,0 +1,45 @@
+---
+version: 1.5.4
+title: Nested Variant JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/json
+
+pub fn node_to_json(node: entity.Node) -> json.Json {
+  case node {
+    entity.Node(left:, right:) ->
+      json.object([
+        #("type", json.string("node")),
+        #("left", node_to_json(left)),
+        #("right", node_to_json(right)),
+      ])
+
+    entity.Leaf(value:) ->
+      json.object([
+        #("type", json.string("leaf")),
+        #("value", json.int(value)),
+      ])
+  }
+}
+
+pub fn node_json_decoder() -> decode.Decoder(entity.Node) {
+  use variant <- decode.field("type", decode.string)
+  case variant {
+    "node" -> {
+      use left <- decode.field("left", node_json_decoder())
+      use right <- decode.field("right", node_json_decoder())
+      decode.success(entity.Node(left:, right:))
+    }
+    "leaf" -> {
+      use value <- decode.field("value", decode.int)
+      decode.success(entity.Leaf(value:))
+    }
+    _ ->
+      decode.failure(
+        entity.Node(left: entity.Leaf(value: 0), right: entity.Leaf(value: 0)),
+        "Node",
+      )
+  }
+}
+

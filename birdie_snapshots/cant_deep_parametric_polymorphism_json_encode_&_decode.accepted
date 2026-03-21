@@ -1,0 +1,59 @@
+---
+version: 1.5.4
+title: Cant Deep Parametric Polymorphism JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/json
+
+pub fn either_to_json(either: entity.Either) -> json.Json {
+  case either {
+    entity.Left(field0) ->
+      json.object([
+        #("type", json.string("left")),
+        todo as "cant handle generic",
+      ])
+
+    entity.Right(field0) ->
+      json.object([
+        #("type", json.string("right")),
+        todo as "cant handle generic",
+      ])
+  }
+}
+
+pub fn container_to_json(container: entity.Container) -> json.Json {
+  case container {
+    entity.Container(either1:, either2:) ->
+      json.object([
+        #("either1", either_to_json(either1)),
+        #("either2", either_to_json(either2)),
+      ])
+  }
+}
+
+pub fn either_json_decoder(
+  either_zero_value: entity.Either,
+) -> decode.Decoder(entity.Either) {
+  use variant <- decode.field("type", decode.string)
+  case variant {
+    "left" -> {
+      todo as "cant handle generic"
+      decode.success(entity.Left(field0))
+    }
+    "right" -> {
+      todo as "cant handle generic"
+      decode.success(entity.Right(field0))
+    }
+    _ -> decode.failure(either_zero_value, "Either")
+  }
+}
+
+pub fn container_json_decoder(
+  either_zero_value: entity.Either,
+) -> decode.Decoder(entity.Container) {
+  use either1 <- decode.field("either1", either_json_decoder(either_zero_value))
+  use either2 <- decode.field("either2", either_json_decoder(either_zero_value))
+  decode.success(entity.Container(either1:, either2:))
+}
+

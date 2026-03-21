@@ -1,0 +1,26 @@
+---
+version: 1.5.4
+title: Float JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/int
+import gleam/json
+
+pub fn value_to_json(value: entity.Value) -> json.Json {
+  case value {
+    entity.Value(value:) ->
+      json.object([
+        #("value", json.float(value)),
+      ])
+  }
+}
+
+pub fn value_json_decoder() -> decode.Decoder(entity.Value) {
+  use value <- decode.field(
+    "value",
+    decode.one_of(decode.float, [decode.map(decode.int, int.to_float)]),
+  )
+  decode.success(entity.Value(value:))
+}
+

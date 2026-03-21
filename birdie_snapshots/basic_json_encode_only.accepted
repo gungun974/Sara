@@ -1,0 +1,13 @@
+---
+version: 1.5.4
+title: Basic JSON encode only
+---
+import entity
+import gleam/json
+
+pub fn post_to_json(post: entity.Post) -> json.Json {
+  case post {
+    entity.Post -> json.object([])
+  }
+}
+

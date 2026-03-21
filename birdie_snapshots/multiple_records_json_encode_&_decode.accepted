@@ -1,0 +1,42 @@
+---
+version: 1.5.4
+title: Multiple Records JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/json
+
+pub fn comment_to_json(comment: entity.Comment) -> json.Json {
+  case comment {
+    entity.Comment(id:, message:) ->
+      json.object([
+        #("id", json.int(id)),
+        #("message", json.string(message)),
+      ])
+  }
+}
+
+pub fn post_to_json(post: entity.Post) -> json.Json {
+  case post {
+    entity.Post(id:, title:, messages:) ->
+      json.object([
+        #("id", json.int(id)),
+        #("title", json.string(title)),
+        #("messages", json.array(messages, fn(x) { comment_to_json(x) })),
+      ])
+  }
+}
+
+pub fn comment_json_decoder() -> decode.Decoder(entity.Comment) {
+  use id <- decode.field("id", decode.int)
+  use message <- decode.field("message", decode.string)
+  decode.success(entity.Comment(id:, message:))
+}
+
+pub fn post_json_decoder() -> decode.Decoder(entity.Post) {
+  use id <- decode.field("id", decode.int)
+  use title <- decode.field("title", decode.string)
+  use messages <- decode.field("messages", decode.list(comment_json_decoder()))
+  decode.success(entity.Post(id:, title:, messages:))
+}
+

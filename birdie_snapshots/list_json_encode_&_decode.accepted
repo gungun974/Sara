@@ -1,0 +1,22 @@
+---
+version: 1.5.4
+title: List JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/json
+
+pub fn value_to_json(value: entity.Value) -> json.Json {
+  case value {
+    entity.Value(value:) ->
+      json.object([
+        #("value", json.array(value, fn(x) { json.int(x) })),
+      ])
+  }
+}
+
+pub fn value_json_decoder() -> decode.Decoder(entity.Value) {
+  use value <- decode.field("value", decode.list(decode.int))
+  decode.success(entity.Value(value:))
+}
+

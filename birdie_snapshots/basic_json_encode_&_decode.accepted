@@ -1,0 +1,18 @@
+---
+version: 1.5.4
+title: Basic JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/json
+
+pub fn post_to_json(post: entity.Post) -> json.Json {
+  case post {
+    entity.Post -> json.object([])
+  }
+}
+
+pub fn post_json_decoder() -> decode.Decoder(entity.Post) {
+  decode.success(entity.Post)
+}
+

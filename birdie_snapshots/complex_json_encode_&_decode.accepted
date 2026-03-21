@@ -1,0 +1,75 @@
+---
+version: 1.5.4
+title: Complex JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/int
+import gleam/json
+
+pub fn value_to_json(value: entity.Value) -> json.Json {
+  case value {
+    entity.Value(bool:, int:, float:, string:, list:, tuple:, complex:) ->
+      json.object([
+        #("bool", json.bool(bool)),
+        #("int", json.int(int)),
+        #("float", json.float(float)),
+        #("string", json.string(string)),
+        #("list", json.array(list, fn(x) { json.int(x) })),
+        #(
+          "tuple",
+          json.preprocessed_array([json.int(tuple.0), json.float(tuple.1)]),
+        ),
+        #(
+          "complex",
+          json.array(complex, fn(x) {
+            json.preprocessed_array([
+              json.string(x.0),
+              json.preprocessed_array([json.bool(x.1.0), json.int(x.1.1)]),
+            ])
+          }),
+        ),
+      ])
+  }
+}
+
+pub fn value_json_decoder() -> decode.Decoder(entity.Value) {
+  use bool <- decode.field("bool", decode.bool)
+  use int <- decode.field("int", decode.int)
+  use float <- decode.field(
+    "float",
+    decode.one_of(decode.float, [decode.map(decode.int, int.to_float)]),
+  )
+  use string <- decode.field("string", decode.string)
+  use list <- decode.field("list", decode.list(decode.int))
+  use tuple <- decode.field("tuple", {
+    use field0 <- decode.field(0, decode.int)
+    use field1 <- decode.field(
+      1,
+      decode.one_of(decode.float, [decode.map(decode.int, int.to_float)]),
+    )
+    decode.success(#(field0, field1))
+  })
+  use complex <- decode.field(
+    "complex",
+    decode.list({
+      use field0 <- decode.field(0, decode.string)
+      use field1 <- decode.field(1, {
+        use field0 <- decode.field(0, decode.bool)
+        use field1 <- decode.field(1, decode.int)
+        decode.success(#(field0, field1))
+      })
+      decode.success(#(field0, field1))
+    }),
+  )
+  decode.success(entity.Value(
+    bool:,
+    int:,
+    float:,
+    string:,
+    list:,
+    tuple:,
+    complex:,
+  ))
+}
+

@@ -1,0 +1,91 @@
+---
+version: 1.5.4
+title: Nested Unknow JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/json
+import gleam/time/timestamp
+
+pub fn post_to_json(
+  post: entity.Post,
+  comment_to_json: fn(entity.Comment) -> json.Json,
+  timestamp_to_json: fn(timestamp.Timestamp) -> json.Json,
+) -> json.Json {
+  case post {
+    entity.Post(id:, title:, messages:, date:) ->
+      json.object([
+        #("type", json.string("post")),
+        #("id", json.int(id)),
+        #("title", json.string(title)),
+        #("messages", json.array(messages, fn(x) { comment_to_json(x) })),
+        #("date", timestamp_to_json(date)),
+      ])
+
+    entity.Error(date:) ->
+      json.object([
+        #("type", json.string("error")),
+        #("date", timestamp_to_json(date)),
+      ])
+  }
+}
+
+pub fn container_to_json(
+  container: entity.Container,
+  comment_to_json: fn(entity.Comment) -> json.Json,
+  timestamp_to_json: fn(timestamp.Timestamp) -> json.Json,
+) -> json.Json {
+  case container {
+    entity.Container(posts:) ->
+      json.object([
+        #(
+          "posts",
+          json.array(posts, fn(x) {
+            post_to_json(x, comment_to_json, timestamp_to_json)
+          }),
+        ),
+      ])
+  }
+}
+
+pub fn post_json_decoder(
+  comment_json_decoder: fn() -> decode.Decoder(entity.Comment),
+  timestamp_json_decoder: fn() -> decode.Decoder(timestamp.Timestamp),
+  post_zero_value: entity.Post,
+) -> decode.Decoder(entity.Post) {
+  use variant <- decode.field("type", decode.string)
+  case variant {
+    "post" -> {
+      use id <- decode.field("id", decode.int)
+      use title <- decode.field("title", decode.string)
+      use messages <- decode.field(
+        "messages",
+        decode.list(comment_json_decoder()),
+      )
+      use date <- decode.field("date", timestamp_json_decoder())
+      decode.success(entity.Post(id:, title:, messages:, date:))
+    }
+    "error" -> {
+      use date <- decode.field("date", timestamp_json_decoder())
+      decode.success(entity.Error(date:))
+    }
+    _ -> decode.failure(post_zero_value, "Post")
+  }
+}
+
+pub fn container_json_decoder(
+  comment_json_decoder: fn() -> decode.Decoder(entity.Comment),
+  timestamp_json_decoder: fn() -> decode.Decoder(timestamp.Timestamp),
+  post_zero_value: entity.Post,
+) -> decode.Decoder(entity.Container) {
+  use posts <- decode.field(
+    "posts",
+    decode.list(post_json_decoder(
+      comment_json_decoder,
+      timestamp_json_decoder,
+      post_zero_value,
+    )),
+  )
+  decode.success(entity.Container(posts:))
+}
+

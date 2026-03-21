@@ -1,0 +1,148 @@
+---
+version: 1.5.4
+title: Complex Variant JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/int
+import gleam/json
+
+pub fn simple_to_json(simple: entity.Simple) -> json.Json {
+  case simple {
+    entity.Simple(simple:) ->
+      json.object([
+        #("simple", json.string(simple)),
+      ])
+  }
+}
+
+pub fn node_to_json(node: entity.Node) -> json.Json {
+  case node {
+    entity.Node(
+      title:,
+      nodes:,
+      bool:,
+      int:,
+      float:,
+      string:,
+      list:,
+      tuple:,
+      complex:,
+      simple:,
+      alias:,
+    ) ->
+      json.object([
+        #("type", json.string("node")),
+        #("title", json.string(title)),
+        #("nodes", json.array(nodes, fn(x) { node_to_json(x) })),
+        #("bool", json.bool(bool)),
+        #("int", json.int(int)),
+        #("float", json.float(float)),
+        #("string", json.string(string)),
+        #("list", json.array(list, fn(x) { json.int(x) })),
+        #(
+          "tuple",
+          json.preprocessed_array([json.int(tuple.0), json.float(tuple.1)]),
+        ),
+        #(
+          "complex",
+          json.array(complex, fn(x) {
+            json.preprocessed_array([
+              json.string(x.0),
+              json.preprocessed_array([json.bool(x.1.0), json.int(x.1.1)]),
+            ])
+          }),
+        ),
+        #("simple", simple_to_json(simple)),
+        #("alias", json.string(alias)),
+      ])
+
+    entity.Leaf(title:, alias:) ->
+      json.object([
+        #("type", json.string("leaf")),
+        #("title", json.string(title)),
+        #("alias", json.string(alias)),
+      ])
+  }
+}
+
+pub fn simple_json_decoder() -> decode.Decoder(entity.Simple) {
+  use simple <- decode.field("simple", decode.string)
+  decode.success(entity.Simple(simple:))
+}
+
+pub fn node_json_decoder() -> decode.Decoder(entity.Node) {
+  use variant <- decode.field("type", decode.string)
+  case variant {
+    "node" -> {
+      use title <- decode.field("title", decode.string)
+      use nodes <- decode.field("nodes", decode.list(node_json_decoder()))
+      use bool <- decode.field("bool", decode.bool)
+      use int <- decode.field("int", decode.int)
+      use float <- decode.field(
+        "float",
+        decode.one_of(decode.float, [decode.map(decode.int, int.to_float)]),
+      )
+      use string <- decode.field("string", decode.string)
+      use list <- decode.field("list", decode.list(decode.int))
+      use tuple <- decode.field("tuple", {
+        use field0 <- decode.field(0, decode.int)
+        use field1 <- decode.field(
+          1,
+          decode.one_of(decode.float, [decode.map(decode.int, int.to_float)]),
+        )
+        decode.success(#(field0, field1))
+      })
+      use complex <- decode.field(
+        "complex",
+        decode.list({
+          use field0 <- decode.field(0, decode.string)
+          use field1 <- decode.field(1, {
+            use field0 <- decode.field(0, decode.bool)
+            use field1 <- decode.field(1, decode.int)
+            decode.success(#(field0, field1))
+          })
+          decode.success(#(field0, field1))
+        }),
+      )
+      use simple <- decode.field("simple", simple_json_decoder())
+      use alias <- decode.field("alias", decode.string)
+      decode.success(entity.Node(
+        title:,
+        nodes:,
+        bool:,
+        int:,
+        float:,
+        string:,
+        list:,
+        tuple:,
+        complex:,
+        simple:,
+        alias:,
+      ))
+    }
+    "leaf" -> {
+      use title <- decode.field("title", decode.string)
+      use alias <- decode.field("alias", decode.string)
+      decode.success(entity.Leaf(title:, alias:))
+    }
+    _ ->
+      decode.failure(
+        entity.Node(
+          title: "",
+          nodes: [],
+          bool: False,
+          int: 0,
+          float: 0,
+          string: "",
+          list: [],
+          tuple: #(0, 0),
+          complex: [],
+          simple: entity.Simple(simple: ""),
+          alias: "",
+        ),
+        "Node",
+      )
+  }
+}
+

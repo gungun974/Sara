@@ -1,0 +1,39 @@
+---
+version: 1.5.4
+title: Basic Parametric Polymorphism JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/json
+
+pub fn container_to_json(
+  container: entity.Container,
+  result_bool_nil_to_json: fn(Result(Bool, Nil)) -> json.Json,
+  result_int_nil_to_json: fn(Result(Int, Nil)) -> json.Json,
+  either_bool_nil_to_json: fn(entity.Either(Bool, Nil)) -> json.Json,
+  either_int_nil_to_json: fn(entity.Either(Int, Nil)) -> json.Json,
+) -> json.Json {
+  case container {
+    entity.Container(res1:, res2:, either1:, either2:) ->
+      json.object([
+        #("res1", result_bool_nil_to_json(res1)),
+        #("res2", result_int_nil_to_json(res2)),
+        #("either1", either_bool_nil_to_json(either1)),
+        #("either2", either_int_nil_to_json(either2)),
+      ])
+  }
+}
+
+pub fn container_json_decoder(
+  result_bool_nil_json_decoder: fn() -> decode.Decoder(Result(Bool, Nil)),
+  result_int_nil_json_decoder: fn() -> decode.Decoder(Result(Int, Nil)),
+  either_bool_nil_json_decoder: fn() -> decode.Decoder(entity.Either(Bool, Nil)),
+  either_int_nil_json_decoder: fn() -> decode.Decoder(entity.Either(Int, Nil)),
+) -> decode.Decoder(entity.Container) {
+  use res1 <- decode.field("res1", result_bool_nil_json_decoder())
+  use res2 <- decode.field("res2", result_int_nil_json_decoder())
+  use either1 <- decode.field("either1", either_bool_nil_json_decoder())
+  use either2 <- decode.field("either2", either_int_nil_json_decoder())
+  decode.success(entity.Container(res1:, res2:, either1:, either2:))
+}
+

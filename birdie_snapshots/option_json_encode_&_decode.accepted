@@ -1,0 +1,48 @@
+---
+version: 1.5.4
+title: Option JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/json
+import gleam/option
+
+pub fn container_to_json(
+  container: entity.Container,
+  zero_to_json: fn(entity.Zero) -> json.Json,
+) -> json.Json {
+  case container {
+    entity.Container(date:) ->
+      json.object([
+        #("type", json.string("container")),
+        #("date", case date {
+          option.None -> json.null()
+          option.Some(x) -> json.int(x)
+        }),
+      ])
+
+    entity.Opaqued(field0) ->
+      json.object([
+        #("type", json.string("opaqued")),
+        #("field0", zero_to_json(field0)),
+      ])
+  }
+}
+
+pub fn container_json_decoder(
+  zero_json_decoder: fn() -> decode.Decoder(entity.Zero),
+) -> decode.Decoder(entity.Container) {
+  use variant <- decode.field("type", decode.string)
+  case variant {
+    "container" -> {
+      use date <- decode.field("date", decode.optional(decode.int))
+      decode.success(entity.Container(date:))
+    }
+    "opaqued" -> {
+      use field0 <- decode.field("field0", zero_json_decoder())
+      decode.success(entity.Opaqued(field0))
+    }
+    _ -> decode.failure(entity.Container(date: option.None), "Container")
+  }
+}
+

@@ -1,0 +1,40 @@
+---
+version: 1.5.4
+title: Prelude shadow JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/json
+
+pub fn string_to_json(string: entity.String) -> json.Json {
+  case string {
+    entity.String(value:) ->
+      json.object([
+        #("value", json.bool(value)),
+      ])
+  }
+}
+
+pub fn post_to_json(post: entity.Post) -> json.Json {
+  case post {
+    entity.Post(id:, title:, content:) ->
+      json.object([
+        #("id", json.float(id)),
+        #("title", string_to_json(title)),
+        #("content", string_to_json(content)),
+      ])
+  }
+}
+
+pub fn string_json_decoder() -> decode.Decoder(entity.String) {
+  use value <- decode.field("value", decode.bool)
+  decode.success(entity.String(value:))
+}
+
+pub fn post_json_decoder() -> decode.Decoder(entity.Post) {
+  use id <- decode.field("id", decode.float)
+  use title <- decode.field("title", string_json_decoder())
+  use content <- decode.field("content", string_json_decoder())
+  decode.success(entity.Post(id:, title:, content:))
+}
+

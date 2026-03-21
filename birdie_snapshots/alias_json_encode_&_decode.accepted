@@ -1,0 +1,26 @@
+---
+version: 1.5.4
+title: Alias JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/json
+
+pub fn post_to_json(post: entity.Post) -> json.Json {
+  case post {
+    entity.Post(id:, title:, content:) ->
+      json.object([
+        #("id", json.int(id)),
+        #("title", json.string(title)),
+        #("content", json.string(content)),
+      ])
+  }
+}
+
+pub fn post_json_decoder() -> decode.Decoder(entity.Post) {
+  use id <- decode.field("id", decode.int)
+  use title <- decode.field("title", decode.string)
+  use content <- decode.field("content", decode.string)
+  decode.success(entity.Post(id:, title:, content:))
+}
+

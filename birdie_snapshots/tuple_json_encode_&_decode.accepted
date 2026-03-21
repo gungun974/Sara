@@ -1,0 +1,33 @@
+---
+version: 1.5.4
+title: Tuple JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/int
+import gleam/json
+
+pub fn value_to_json(value: entity.Value) -> json.Json {
+  case value {
+    entity.Value(value:) ->
+      json.object([
+        #(
+          "value",
+          json.preprocessed_array([json.int(value.0), json.float(value.1)]),
+        ),
+      ])
+  }
+}
+
+pub fn value_json_decoder() -> decode.Decoder(entity.Value) {
+  use value <- decode.field("value", {
+    use field0 <- decode.field(0, decode.int)
+    use field1 <- decode.field(
+      1,
+      decode.one_of(decode.float, [decode.map(decode.int, int.to_float)]),
+    )
+    decode.success(#(field0, field1))
+  })
+  decode.success(entity.Value(value:))
+}
+

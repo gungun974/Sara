@@ -1,0 +1,11 @@
+---
+version: 1.5.4
+title: Basic JSON decode only
+---
+import entity
+import gleam/dynamic/decode
+
+pub fn post_json_decoder() -> decode.Decoder(entity.Post) {
+  decode.success(entity.Post)
+}
+
