@@ -102,7 +102,7 @@ pub fn main() -> Nil {
     "Finished in " <> float.to_precision(duration, 3) |> float.to_string <> "s",
   )
 
-  exit(1)
+  exit(0)
 }
 
 @external(erlang, "sara_ffi", "elapsed")
