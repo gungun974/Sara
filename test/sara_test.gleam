@@ -787,3 +787,40 @@ pub type EntityConfig {
     ],
   )
 }
+
+pub fn dict_codec_test() {
+  sara_test_util.prepare_basic_json_test(
+    json.Config([]),
+    [
+      VirtualFile(
+        path: "/gleam/dict.gleam",
+        contents: "
+pub type Dict(key, value)
+",
+      ),
+      VirtualFile(
+        path: "/entity.gleam",
+        contents: "
+import gleam/dict
+
+//@json_encode()
+//@json_decode()
+pub type Model {
+  Model(
+    directories: dict.Dict(String, DirectoryContents),
+    a: dict.Dict(Int, Int),
+    b: dict.Dict(Bool, String),
+    c: dict.Dict(Float, String),
+  )
+}
+
+//@json_encode()
+//@json_decode()
+pub type DirectoryContents {
+  DirectoryContents(items: dict.Dict(String, Bool))
+}",
+      ),
+    ],
+    [#("/entity_json.gleam", "Dict JSON encode & decode")],
+  )
+}

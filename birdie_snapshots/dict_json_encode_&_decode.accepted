@@ -1,0 +1,97 @@
+---
+version: 1.5.4
+title: Dict JSON encode & decode
+---
+import entity
+import gleam/bool
+import gleam/dict
+import gleam/dynamic/decode
+import gleam/float
+import gleam/int
+import gleam/json
+
+pub fn model_to_json(model: entity.Model) -> json.Json {
+  case model {
+    entity.Model(directories:, a:, b:, c:) ->
+      json.object([
+        #(
+          "directories",
+          json.dict(directories, fn(x) { x }, fn(x) {
+            directory_contents_to_json(x)
+          }),
+        ),
+        #("a", json.dict(a, fn(x) { int.to_string(x) }, fn(x) { json.int(x) })),
+        #(
+          "b",
+          json.dict(b, fn(x) { bool.to_string(x) }, fn(x) { json.string(x) }),
+        ),
+        #(
+          "c",
+          json.dict(c, fn(x) { float.to_string(x) }, fn(x) { json.string(x) }),
+        ),
+      ])
+  }
+}
+
+pub fn directory_contents_to_json(
+  directory_contents: entity.DirectoryContents,
+) -> json.Json {
+  case directory_contents {
+    entity.DirectoryContents(items:) ->
+      json.object([
+        #("items", json.dict(items, fn(x) { x }, fn(x) { json.bool(x) })),
+      ])
+  }
+}
+
+pub fn model_json_decoder() -> decode.Decoder(entity.Model) {
+  use directories <- decode.field(
+    "directories",
+    decode.dict(decode.string, directory_contents_json_decoder()),
+  )
+  use a <- decode.field(
+    "a",
+    decode.dict(
+      decode.then(decode.string, fn(s) {
+        case int.parse(s) {
+          Ok(v) -> decode.success(v)
+          Error(_) -> decode.failure(0, "Int")
+        }
+      }),
+      decode.int,
+    ),
+  )
+  use b <- decode.field(
+    "b",
+    decode.dict(
+      decode.then(decode.string, fn(s) {
+        case s {
+          "True" -> decode.success(True)
+          _ -> decode.success(False)
+        }
+      }),
+      decode.string,
+    ),
+  )
+  use c <- decode.field(
+    "c",
+    decode.dict(
+      decode.then(decode.string, fn(s) {
+        case float.parse(s) {
+          Ok(v) -> decode.success(v)
+          Error(_) -> decode.failure(0.0, "Float")
+        }
+      }),
+      decode.string,
+    ),
+  )
+  decode.success(entity.Model(directories:, a:, b:, c:))
+}
+
+pub fn directory_contents_json_decoder() -> decode.Decoder(
+  entity.DirectoryContents,
+) {
+  use items <- decode.field("items", decode.dict(decode.string, decode.bool))
+  decode.success(entity.DirectoryContents(items:))
+}
+

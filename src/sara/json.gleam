@@ -547,6 +547,105 @@ fn json_encode_type_generic(
                 )
               },
             ),
+            CustomEncoder(
+              type_name: "Dict",
+              module_path: "gleam/dict",
+              encode: fn(_, _, variable, _, _) {
+                let assert glance.NamedType(parameters:, ..) = type_
+                let assert [type_key, type_value, ..] = parameters
+
+                let custom_stringify = {
+                  let parameters = case type_key {
+                    glance.NamedType(parameters:, ..) -> parameters
+                    _ -> []
+                  }
+                  let function =
+                    justin.snake_case(case type_key {
+                      glance.NamedType(name:, ..) -> name
+                      _ -> ""
+                    })
+                    <> case parameters {
+                      [] ->
+                        case type_key {
+                          glance.FunctionType(..) -> variable
+                          _ -> ""
+                        }
+                      _ ->
+                        "_"
+                        <> list.map(parameters, fn(parameter) {
+                          case parameter {
+                            glance.NamedType(name:, ..) ->
+                              justin.snake_case(name)
+                            _ -> ""
+                          }
+                        })
+                        |> string.join("_")
+                    }
+                    <> "_stringify"
+
+                  GeneratedCode(function <> "(" <> variable <> ")", [], [
+                    #(function, ""),
+                  ])
+                }
+
+                let code_key = case type_key {
+                  glance.NamedType(name:, ..) -> {
+                    case
+                      name,
+                      inspect.is_prelude_type(ctx, type_key, current_module)
+                    {
+                      "Int", True ->
+                        GeneratedCode(
+                          "fn (x) {int.to_string(x)}",
+                          ["gleam/int"],
+                          [],
+                        )
+                      "Float", True ->
+                        GeneratedCode(
+                          "fn (x) {float.to_string(x)}",
+                          ["gleam/float"],
+                          [],
+                        )
+                      "Bool", True ->
+                        GeneratedCode(
+                          "fn (x) {bool.to_string(x)}",
+                          ["gleam/bool"],
+                          [],
+                        )
+                      "String", True -> GeneratedCode("fn (x) {x}", [], [])
+                      _, _ -> custom_stringify
+                    }
+                  }
+                  _ -> custom_stringify
+                }
+
+                let code_value =
+                  json_encode_type(
+                    config,
+                    ctx,
+                    type_value,
+                    "x",
+                    current_module,
+                    original_module,
+                    custom_type_path,
+                  )
+
+                GeneratedCode(
+                  "json.dict("
+                    <> variable
+                    <> ","
+                    <> code_key.code
+                    <> ",fn (x) {"
+                    <> code_value.code
+                    <> "})",
+                  list.append(
+                    ["gleam/dict"],
+                    list.append(code_key.imports, code_value.imports),
+                  ),
+                  list.append(code_key.arguments, code_value.arguments),
+                )
+              },
+            ),
           ]
 
           let encoder =
@@ -697,7 +796,12 @@ fn json_encode_type_generic(
           _ -> ""
         })
         <> case parameters {
-          [] -> variable
+          [] ->
+            case type_ {
+              glance.FunctionType(..) -> variable
+              _ -> ""
+            }
+
           _ ->
             "_"
             <> list.map(parameters, fn(parameter) {
@@ -1087,6 +1191,97 @@ fn json_decode_type_generic(
                 )
               },
             ),
+            CustomDecoder(
+              type_name: "Dict",
+              module_path: "gleam/dict",
+              decode: fn(_, _, _, _) {
+                let assert glance.NamedType(parameters:, ..) = type_
+                let assert [type_key, type_value, ..] = parameters
+
+                let code_key = {
+                  let custom_key_decoder = {
+                    let key_parameters = case type_key {
+                      glance.NamedType(parameters:, ..) -> parameters
+                      _ -> []
+                    }
+                    let function =
+                      justin.snake_case(case type_key {
+                        glance.NamedType(name:, ..) -> name
+                        _ -> ""
+                      })
+                      <> case key_parameters {
+                        [] -> ""
+                        _ ->
+                          "_"
+                          <> list.map(key_parameters, fn(p) {
+                            case p {
+                              glance.NamedType(name:, ..) ->
+                                justin.snake_case(name)
+                              _ -> ""
+                            }
+                          })
+                          |> string.join("_")
+                      }
+                      <> "_key_decoder"
+                    GeneratedCode(function, [], [#(function, "")])
+                  }
+
+                  case type_key {
+                    glance.NamedType(name:, ..) ->
+                      case
+                        name,
+                        inspect.is_prelude_type(ctx, type_key, current_module)
+                      {
+                        "String", True -> GeneratedCode("decode.string", [], [])
+                        "Int", True ->
+                          GeneratedCode(
+                            "decode.then(decode.string, fn(s) { case int.parse(s) { Ok(v) -> decode.success(v) Error(_) -> decode.failure(0, \"Int\") } })",
+                            ["gleam/int"],
+                            [],
+                          )
+                        "Float", True ->
+                          GeneratedCode(
+                            "decode.then(decode.string, fn(s) { case float.parse(s) { Ok(v) -> decode.success(v) Error(_) -> decode.failure(0.0, \"Float\") } })",
+                            ["gleam/float"],
+                            [],
+                          )
+                        "Bool", True ->
+                          GeneratedCode(
+                            "decode.then(decode.string, fn(s) { case s { \"True\" -> decode.success(True) _ -> decode.success(False) } })",
+                            [],
+                            [],
+                          )
+                        _, _ -> custom_key_decoder
+                      }
+                    _ -> custom_key_decoder
+                  }
+                }
+
+                let code_value =
+                  json_decode_type(
+                    config,
+                    ctx,
+                    type_value,
+                    variable,
+                    current_module,
+                    original_module,
+                    custom_type_path,
+                  )
+
+                GeneratedCode(
+                  "decode.dict("
+                    <> code_key.code
+                    <> ","
+                    <> code_value.code
+                    <> ")",
+                  list.append(
+                    ["gleam/dict"],
+                    list.append(code_key.imports, code_value.imports),
+                  ),
+                  list.append(code_key.arguments, code_value.arguments),
+                )
+              },
+            ),
           ]
 
           let decoder =
@@ -1226,7 +1421,12 @@ fn json_decode_type_generic(
           _ -> ""
         })
         <> case parameters {
-          [] -> variable
+          [] ->
+            case type_ {
+              glance.FunctionType(..) -> variable
+              _ -> ""
+            }
+
           _ ->
             "_"
             <> list.map(parameters, fn(parameter) {
@@ -1415,6 +1615,13 @@ fn get_zero_value_generic(
               module_path: "gleam/option",
               zero: fn(_, _, _, _) {
                 Ok(GeneratedCode("option.None", ["gleam/option"], []))
+              },
+            ),
+            CustomZeroValue(
+              type_name: "Dict",
+              module_path: "gleam/dict",
+              zero: fn(_, _, _, _) {
+                Ok(GeneratedCode("dict.new()", ["gleam/dict"], []))
               },
             ),
           ]

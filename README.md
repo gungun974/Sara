@@ -63,6 +63,8 @@ The types that are currently supported are:
 | `String` | `String` | Text strings |
 | `List` | `List(Int)` | Lists of any supported type |
 | `Tuple` | `#(Int, Float)` | Tuples of any supported types |
+| `option.Option` | `Option(Bool)` | stdlib Option of any supported type |
+| `dict.Dict` | `Dict(Int, Float)` | stdlib Dict of any supported type values |
 | `Type Aliases` | `type Alias = String` | Type aliases are resolved to their underlying type |
 | `Custom Types` | `type Node { Leaf(Int) \| Branch(Node, Node) }` | Custom types with multiple variants |
 | `Recursive Types` | `type Node { Node(left: Node, right: Node) \| Leaf(Int) }` | Types that reference themselves |
