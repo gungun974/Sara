@@ -4,6 +4,7 @@ title: Prelude shadow JSON encode & decode
 ---
 import entity
 import gleam/dynamic/decode
+import gleam/int
 import gleam/json
 
 pub fn string_to_json(string: entity.String) -> json.Json {
@@ -32,7 +33,10 @@ pub fn string_json_decoder() -> decode.Decoder(entity.String) {
 }
 
 pub fn post_json_decoder() -> decode.Decoder(entity.Post) {
-  use id <- decode.field("id", decode.float)
+  use id <- decode.field(
+    "id",
+    decode.one_of(decode.float, [decode.map(decode.int, int.to_float)]),
+  )
   use title <- decode.field("title", string_json_decoder())
   use content <- decode.field("content", string_json_decoder())
   decode.success(entity.Post(id:, title:, content:))

@@ -473,6 +473,16 @@ fn json_encode_type(
           |> list.fold([], fn(acc, arguments) { list.append(acc, arguments) }),
       )
     }
+    glance.FunctionType(..) ->
+      json_encode_type_generic(
+        config,
+        ctx,
+        type_,
+        variable,
+        current_module,
+        original_module,
+        custom_type_path,
+      )
     _ -> GeneratedCode("todo", [], [])
   }
 }
@@ -687,7 +697,7 @@ fn json_encode_type_generic(
           _ -> ""
         })
         <> case parameters {
-          [] -> ""
+          [] -> variable
           _ ->
             "_"
             <> list.map(parameters, fn(parameter) {
@@ -853,6 +863,7 @@ fn json_decode_variant(
               config,
               ctx,
               field.item,
+              variable,
               module,
               module,
               custom_type_path,
@@ -919,6 +930,7 @@ fn json_decode_type(
   config: Config,
   ctx: BuildContext,
   type_: glance.Type,
+  variable: String,
   current_module: Module,
   original_module: Module,
   custom_type_path: Set(glance.CustomType),
@@ -944,6 +956,7 @@ fn json_decode_type(
               config,
               ctx,
               type_,
+              variable,
               current_module,
               original_module,
               custom_type_path,
@@ -959,6 +972,7 @@ fn json_decode_type(
             config,
             ctx,
             type_,
+            variable,
             current_module,
             original_module,
             custom_type_path,
@@ -972,6 +986,7 @@ fn json_decode_type(
             config,
             ctx,
             element,
+            variable,
             current_module,
             original_module,
             custom_type_path,
@@ -1003,6 +1018,16 @@ fn json_decode_type(
           |> list.fold([], fn(acc, arguments) { list.append(acc, arguments) }),
       )
     }
+    glance.FunctionType(..) ->
+      json_decode_type_generic(
+        config,
+        ctx,
+        type_,
+        variable,
+        current_module,
+        original_module,
+        custom_type_path,
+      )
     _ -> GeneratedCode("todo", [], [])
   }
 }
@@ -1011,6 +1036,7 @@ fn json_decode_type_generic(
   config: Config,
   ctx: BuildContext,
   type_: glance.Type,
+  variable: String,
   current_module: Module,
   original_module: Module,
   custom_type_path: Set(glance.CustomType),
@@ -1030,6 +1056,7 @@ fn json_decode_type_generic(
             config,
             ctx,
             source.definition.aliased,
+            variable,
             module,
             original_module,
             custom_type_path,
@@ -1047,6 +1074,7 @@ fn json_decode_type_generic(
                     config,
                     ctx,
                     type_,
+                    variable,
                     current_module,
                     original_module,
                     custom_type_path,
@@ -1198,7 +1226,7 @@ fn json_decode_type_generic(
           _ -> ""
         })
         <> case parameters {
-          [] -> ""
+          [] -> variable
           _ ->
             "_"
             <> list.map(parameters, fn(parameter) {

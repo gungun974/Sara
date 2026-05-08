@@ -1,0 +1,35 @@
+---
+version: 1.5.4
+title: Function JSON encode & decode
+---
+import entity
+import gleam/dynamic/decode
+import gleam/json
+
+pub fn entity_config_to_json(
+  entity_config: entity.EntityConfig,
+  property_to_json,
+  behavior_to_json,
+) -> json.Json {
+  case entity_config {
+    entity.EntityConfig(name:, property:, behavior:, availability:) ->
+      json.object([
+        #("name", json.string(name)),
+        #("property", property_to_json(property)),
+        #("behavior", behavior_to_json(behavior)),
+        #("availability", json.bool(availability)),
+      ])
+  }
+}
+
+pub fn entity_config_json_decoder(
+  property_json_decoder,
+  behavior_json_decoder,
+) -> decode.Decoder(entity.EntityConfig) {
+  use name <- decode.field("name", decode.string)
+  use property <- decode.field("property", property_json_decoder())
+  use behavior <- decode.field("behavior", behavior_json_decoder())
+  use availability <- decode.field("availability", decode.bool)
+  decode.success(entity.EntityConfig(name:, property:, behavior:, availability:))
+}
+
