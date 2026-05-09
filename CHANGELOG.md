@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [1.0.1] - 09/05/2026
+
 - Add generated file output logging
 - Add support for `dict.Dict` inside encode & decode
 - Add support for custom function inside encode & decode
