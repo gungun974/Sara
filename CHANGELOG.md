@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add generated file output logging
 - Add support for `dict.Dict` inside encode & decode
 - Add support for custom function inside encode & decode
 

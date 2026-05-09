@@ -75,6 +75,7 @@ import builder/module.{type Module}
 import glance.{type CustomType}
 import gleam/bool
 import gleam/int
+import gleam/io
 import gleam/list
 import gleam/option.{None}
 import gleam/set.{type Set}
@@ -207,6 +208,11 @@ pub fn json_serializable_builder(config: Config) {
       |> string.join("\n")
 
     let assert Ok(code) = format.format_gleam_code(output)
+
+    io.println(
+      "✨ Generated: "
+      <> { asset.change_extension(input.file, "_json.gleam") }.path,
+    )
 
     let _ =
       context.write(
