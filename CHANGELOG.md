@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [1.0.2] - 13/06/2026
+
 - Add support for Javascript runtime as target (not browser)
 
 ## [1.0.1] - 09/05/2026
