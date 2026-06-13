@@ -106,7 +106,9 @@ pub fn main() -> Nil {
 }
 
 @external(erlang, "sara_ffi", "elapsed")
+@external(javascript, "./sara_ffi.mjs", "elapsed")
 pub fn elapsed(during fun: fn() -> a) -> #(a, Float)
 
 @external(erlang, "sara_ffi", "exit")
+@external(javascript, "./sara_ffi.mjs", "exit")
 fn exit(n: Int) -> Nil

@@ -6,7 +6,7 @@ import gleam/list
 import gleam/option.{None}
 import sara/json
 
-pub fn prepare_basic_json_test(
+pub fn prepare_basic_json(
   config: json.Config,
   files: List(simulate.VirtualFile),
   outputs: List(#(String, String)),

@@ -8,7 +8,7 @@ pub fn main() -> Nil {
 }
 
 pub fn empty_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(path: "/entity.gleam", contents: ""),
@@ -18,7 +18,7 @@ pub fn empty_test() {
 }
 
 pub fn ignore_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -34,7 +34,7 @@ pub type Post {
 }
 
 pub fn basic_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -52,7 +52,7 @@ pub type Post {
 }
 
 pub fn basic_decode_only_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -69,7 +69,7 @@ pub type Post {
 }
 
 pub fn basic_encode_only_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -86,7 +86,7 @@ pub type Post {
 }
 
 pub fn bool_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -104,7 +104,7 @@ pub type Value {
 }
 
 pub fn int_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -122,7 +122,7 @@ pub type Value {
 }
 
 pub fn float_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -140,7 +140,7 @@ pub type Value {
 }
 
 pub fn string_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -158,7 +158,7 @@ pub type Value {
 }
 
 pub fn list_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -176,7 +176,7 @@ pub type Value {
 }
 
 pub fn tuple_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -194,7 +194,7 @@ pub type Value {
 }
 
 pub fn complex_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -220,7 +220,7 @@ pub type Value {
 }
 
 pub fn basic_variant_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -239,7 +239,7 @@ pub type Password {
 }
 
 pub fn nested_variant_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -258,7 +258,7 @@ pub type Node {
 }
 
 pub fn complex_variant_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -302,7 +302,7 @@ pub type Node {
 }
 
 pub fn multiple_records_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -333,7 +333,7 @@ pub type Post {
 }
 
 pub fn multiple_files_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -384,7 +384,7 @@ pub type Post {
 }
 
 pub fn alias_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -408,7 +408,7 @@ pub type Post {
 }
 
 pub fn prelude_shadow_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -440,7 +440,7 @@ pub type Post {
 }
 
 pub fn unknow_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -483,7 +483,7 @@ pub type Post {
 }
 
 pub fn nested_unknow_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -535,7 +535,7 @@ pub type Container {
 }
 
 pub fn recursive_nested_unknow_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -588,7 +588,7 @@ pub type Container {
 }
 
 pub fn custom_type_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([
       json.CustomCodec(
         type_name: "Timestamp",
@@ -659,7 +659,7 @@ pub type Container {
 }
 
 pub fn option_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -695,7 +695,7 @@ pub type Container {
 }
 
 pub fn basic_parameters_polymorphism_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -729,7 +729,7 @@ pub type Container {
 }
 
 pub fn cant_deep_parameters_polymorphism_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -763,7 +763,7 @@ pub type Container {
 }
 
 pub fn function_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(
@@ -789,7 +789,7 @@ pub type EntityConfig {
 }
 
 pub fn dict_codec_test() {
-  sara_test_util.prepare_basic_json_test(
+  sara_test_util.prepare_basic_json(
     json.Config([]),
     [
       VirtualFile(

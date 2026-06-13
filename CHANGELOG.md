@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add support for Javascript runtime as target (not browser)
+
 ## [1.0.1] - 09/05/2026
 
 - Add generated file output logging
